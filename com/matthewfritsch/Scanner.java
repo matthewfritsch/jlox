@@ -64,15 +64,56 @@ class Scanner {
                 }
                 break;
 
+            case '\n';
+                ++line;
+            case ' ':
+            case '\r':
+            case '\t':
+                break;
+
+            case '"':
+                string();
+                break;
+
             default:
-                Lox.error(line, "Unexpected character.");
+                if (isDigit(c)) {
+                    number();
+                } else {
+                    Lox.error(line, "Unexpected character.");
+                }
                 break;
         }
+    }
+
+    //capture the entirety of a string literal
+    private void string() {
+        char p = peek();
+        while (p != '"' && !isAtEnd()) {
+            if(p == '\n') ++line;
+            advance();
+            p = peek();
+        }
+
+        //we didn't find the second doublequote :/
+        if (isAtEnd()) {
+            Lox.error(line, "Unterminated string");
+            return;
+        }
+
+        advance(); // the closing doublequote
+
+        //Trim the surrounding quotes
+        String value = source.substring(start+1, current-1);
+        addToken(TokenType.STRING, value);
     }
 
     private char peek() {
         if (isAtEnd()) return '\0';
         return source.charAt(current);
+    }
+
+    private boolean isDigit(char c) {
+        return c >= '0' && c <= '9';
     }
 
     // is the char at current what we expect? if so, this op is not single-char
