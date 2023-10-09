@@ -1,4 +1,4 @@
-package com.matthewfritsch.lox;
+package com.matthewfritsch;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,8 +9,8 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class Lox {
-    static boolean hasError = false;
-    public static void main(String[] args) {
+    static boolean hadError = false;
+    public static void main(String[] args) throws IOException {
         if(args.length > 1) {
             System.out.println("Usage: jlox [script]");
             System.exit(64); //see sysexits.h
