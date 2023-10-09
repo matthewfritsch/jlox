@@ -46,6 +46,7 @@ class Scanner {
             scanToken();
         }
         tokens.add(new Token(TokenType.EOF, "", null, line));
+        return tokens;
     }
 
     private void scanToken() {
@@ -85,7 +86,7 @@ class Scanner {
                 }
                 break;
 
-            case '\n';
+            case '\n':
                 ++line;
             case ' ':
             case '\r':
@@ -150,11 +151,11 @@ class Scanner {
         return source.charAt(current++);
     }
 
-    private addToken(TokenType t) {
+    private void addToken(TokenType t) {
         addToken(t, null);
     }
 
-    private addToken(TokenType t, Object literal) {
+    private void addToken(TokenType type, Object literal) {
         String text = source.substring(start, current);
         tokens.add(new Token(type, text, literal, line));
     }
