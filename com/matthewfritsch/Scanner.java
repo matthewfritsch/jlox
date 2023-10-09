@@ -81,6 +81,12 @@ class Scanner {
                 if (match('/')) {
                     //comment, so look for NL or EOL
                     while (peek() != '\n' && !isAtEnd()) advance();
+                } else if (match('*')){
+                    while (!isAtEnd() && !(peek() == '*' && peekNext() == '/')) advance();
+                    if(!isAtEnd()) {
+                        advance();
+                        advance();
+                    }
                 } else {
                     addToken(TokenType.SLASH);
                 }
@@ -100,11 +106,35 @@ class Scanner {
             default:
                 if (isDigit(c)) {
                     number();
+                } else if (isAlpha(c)) {
+                    identifier();
                 } else {
                     Lox.error(line, "Unexpected character.");
                 }
                 break;
         }
+    }
+
+    private void identifier() {
+        while (isAlphaNumeric(peek())) advance();
+
+        String text = source.substring(start,current);
+        TokenType type = keywords.get(text); //keywords tells us if this is a reserved word
+        if (type == null) type = TokenType.IDENTIFIER;
+        addToken(type);
+    }
+
+    private void number() {
+        while (isDigit(peek())) advance(); //collect the entirety of this number
+
+        if (peek() == '.' && isDigit(peekNext())) { //it's a decimal. collect more numbers.
+            advance();
+
+            while (isDigit(peek())) advance();
+        }
+
+        addToken(TokenType.NUMBER,
+            Double.parseDouble(source.substring(start, current)));
     }
 
     //capture the entirety of a string literal
@@ -132,6 +162,21 @@ class Scanner {
     private char peek() {
         if (isAtEnd()) return '\0';
         return source.charAt(current);
+    }
+
+    private char peekNext() {
+        if (current + 1 >= source.length()) return '\0';
+        return source.charAt(current + 1);
+    }
+
+    private boolean isAlpha(char c) {
+        return (c >= 'a' && c <= 'z') ||
+               (c >= 'A' && c <= 'Z') ||
+                c == '_';
+    }
+
+    private boolean isAlphaNumeric(char c){
+        return isAlpha(c) || isDigit(c);
     }
 
     private boolean isDigit(char c) {
