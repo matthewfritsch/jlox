@@ -1,4 +1,4 @@
-package com.matthewfritsch.lox;
+package com.matthewfritsch;
 
 class Token {
     final TokenType type;

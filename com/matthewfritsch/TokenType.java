@@ -1,4 +1,4 @@
-package com.matthewfritsch.lox;
+package com.matthewfritsch;
 
 enum TokenType {
     //single char token
