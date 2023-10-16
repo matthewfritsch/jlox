@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.matthewfritsch.TokenType;
+import com.matthewfritsch.lang.TokenType;
 
 class Scanner {
     private int start = 0;
