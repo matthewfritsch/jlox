@@ -1,4 +1,4 @@
-package com.matthewfritsch;
+package com.matthewfritsch.lang;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package com.matthewfritsch;
+package com.matthewfritsch.lang;
 
 class Token {
     final TokenType type;

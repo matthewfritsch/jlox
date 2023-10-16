@@ -1,4 +1,4 @@
-package com.tool;
+package com.matthewfritsch.tool;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -24,7 +24,7 @@ public class GenerateAst {
         String path = outputDir + "/" + baseName + ".java";
         PrintWriter writer = new PrintWriter(path, "UTF-8");
 
-        writer.println("package com.matthewfritsch;");
+        writer.println("package com.matthewfritsch.lang;");
         writer.println();
         writer.println("import java.util.List;");
         writer.println();

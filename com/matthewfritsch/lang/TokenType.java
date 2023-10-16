@@ -1,4 +1,4 @@
-package com.matthewfritsch;
+package com.matthewfritsch.lang;
 
 enum TokenType {
     //single char token

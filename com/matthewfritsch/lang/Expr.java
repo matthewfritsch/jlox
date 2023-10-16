@@ -1,4 +1,4 @@
-package com.matthewfritsch;
+package com.matthewfritsch.lang;
 
 import java.util.List;
 
