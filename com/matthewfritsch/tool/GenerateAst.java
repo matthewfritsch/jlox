@@ -5,6 +5,8 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
+import com.matthewfritsch.util.Utility;
+
 public class GenerateAst {
     public static void main(String[] args) throws IOException {
         if (args.length != 1) {
@@ -24,11 +26,13 @@ public class GenerateAst {
         String path = outputDir + "/" + baseName + ".java";
         PrintWriter writer = new PrintWriter(path, "UTF-8");
 
-        writer.println("package com.matthewfritsch.lang;");
-        writer.println();
-        writer.println("import java.util.List;");
-        writer.println();
-        writer.println("abstract class " + baseName + "{");
+        Utility.writeln(writer, "package com.matthewfritsch.lang;");
+        Utility.writeln(writer);
+        Utility.writeln(writer, "import java.util.List;");
+        Utility.writeln(writer);
+        Utility.writeln(writer, "abstract class " + baseName + "{");
+
+        defineVisitor(writer, baseName, types);
 
         for (String type : types) {
             String className = type.split(":")[0].trim();
@@ -36,32 +40,60 @@ public class GenerateAst {
             defineType(writer, baseName, className, fields);
         }
 
-        writer.println("}");
+        Utility.writeln(writer);
+        Utility.writeln(writer, "abstract <R> R accept(Visitor<R> visitor);", 1);
+
+        Utility.writeln(writer, "}");
         writer.close();
     }
 
+    // visitor pattern
+    // We're defining he visitor interface here so each Expr can have an "accept" fn.
+    // The accept fn will work differently for each Expr type, but they all need to be
+    // able to do this.
+    //
+    private static void defineVisitor(PrintWriter writer, String baseName, List<String> types) {
+        Utility.writeln(writer, "interface Visitor<R> {", 1);
+
+        for (String type: types) {
+            String typeName = type.split(":")[0].trim();
+            Utility.writeln(writer, 
+                "R visit" + typeName + baseName + "(" + typeName + " " + baseName.toLowerCase() + ");",
+                2);
+        }
+
+        Utility.writeln(writer, "}", 1);
+    }
+
     private static void defineType(PrintWriter writer, String baseName, String className, String fieldList) {
-        writer.println("    static class " + className + " extends " + baseName + " {");
+        Utility.writeln(writer, "static class " + className + " extends " + baseName + " {", 1);
 
         //ctr
-        writer.println("        " + className + "(" + fieldList + ") {");
+        Utility.writeln(writer, className + "(" + fieldList + ") {", 2);
 
         //Store params in fields
         String[] fields = fieldList.split(", ");
         for (String field : fields) {
             String name = field.split(" ")[1];
-            writer.println("            this." + name + " = " + name + ";");
+            Utility.writeln(writer, "this." + name + " = " + name + ";", 3);
         }
 
-        writer.println("        }");
+        Utility.writeln(writer, "}", 2);
+
+        //visitor pattern
+        Utility.writeln(writer);
+        Utility.writeln(writer, "@Override", 2);
+        Utility.writeln(writer, "<R> R accept(Visitor<R> visitor) {", 2);
+        Utility.writeln(writer, "return visitor.visit" + className + baseName + "(this);" , 3);
+        Utility.writeln(writer, "}", 2);
 
         //Fields
-        writer.println();
+        Utility.writeln(writer);
         for (String field : fields) {
-            writer.println("        final " + field + ";");
+            Utility.writeln(writer, "final " + field + ";", 2);
         }
 
-        writer.println("    }");
+        Utility.writeln(writer, "}", 1);
     }
     
 }
