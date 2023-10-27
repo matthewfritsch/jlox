@@ -1,14 +1,24 @@
 package com.matthewfritsch.lang;
 
 import java.util.List;
-// import static com.matthewfritsch.lang.TokenType;
 
 class Parser {
+    private static class ParseError extends RuntimeException {}
+
     private final List<Token> tokens;
     private int current = 0;
 
     Parser(List<Token> tokens){
         this.tokens = tokens;
+    }
+
+    Expr parse() {
+        try {
+            return expression();
+        }
+        catch (ParseError error) {
+            return null;
+        }
     }
 
     private Expr expression() {
@@ -41,6 +51,7 @@ class Parser {
         return expr;
     }
 
+    //term -> factor ( ( "-" | "+" ) factor )* ;
     private Expr term() {
         Expr expr = factor();
 
@@ -53,6 +64,7 @@ class Parser {
         return expr;
     }
 
+    //factor -> unary ( ( "/" | "*" ) unary )* ;
     private Expr factor() {
         Expr expr = unary();
 
@@ -65,16 +77,18 @@ class Parser {
         return expr;
     }
 
+    // unary -> ( "!" | "-" ) unary | primary ;
     private Expr unary() {
         if (match(TokenType.BANG, TokenType.MINUS)) {
             Token operator = previous();
             Expr right = unary();
-            expr = new Expr.Unary(operator, right);
+            return new Expr.Unary(operator, right);
         }
 
         return primary();
     }
 
+    // primary -> NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" ;
     private Expr primary() {
         if(match(TokenType.FALSE)) return new Expr.Literal(false);
         if(match(TokenType.TRUE)) return new Expr.Literal(true);
@@ -89,6 +103,8 @@ class Parser {
             consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
             return new Expr.Grouping(expr);
         }
+
+        throw error(peek(), "Expect expression.");
     }
 
     private boolean match(TokenType... types) {
@@ -99,6 +115,11 @@ class Parser {
             }
         }
         return false;
+    }
+
+    private Token consume(TokenType type, String message) {
+        if(check(type)) return advance();
+        throw error(peek(), message);
     }
 
     private boolean check(TokenType type) {
@@ -115,11 +136,37 @@ class Parser {
         return peek().type == TokenType.EOF;
     }
 
-    private boolean peek() {
+    private Token peek() {
         return tokens.get(current);
     }
 
     private Token previous() {
         return tokens.get(current-1);
+    }
+
+    private ParseError error(Token token, String message) {
+        Lox.error(token, message);
+        return new ParseError();
+    }
+
+    private void synchronize() {
+        advance();
+        while (!isAtEnd()) {
+            if(previous().type == TokenType.SEMICOLON) return;
+
+            switch(peek().type) {
+                case CLASS:
+                case FOR:
+                case FUN:
+                case IF:
+                case PRINT:
+                case RETURN:
+                case VAR:
+                case WHILE:
+                    return;
+            }
+
+            advance();
+        }
     }
 }
