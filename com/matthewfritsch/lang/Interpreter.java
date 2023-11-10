@@ -36,12 +36,13 @@ class Interpreter implements Expr.Visitor<Object> {
         Object right = evaluate(expr.right);
 
         switch(expr.operator.type) {
-            case TokenType.BANG:
+            case BANG:
                 return !isTruthy(right);
-            case TokenType.MINUS:
+            case MINUS:
                 checkNumberOperand(expr.operator, right);
                 return -(double)right;
         }
+        return null;
     }
 
     private void checkNumberOperand(Token operator, Object operand) {
@@ -64,40 +65,48 @@ class Interpreter implements Expr.Visitor<Object> {
         Object right = evaluate(expr.right);
 
         switch (expr.operator.type) {
-            case TokenType.MINUS:
+            case MINUS:
                 checkNumberOperands(expr.operator, left, right);
                 return (double) left - (double)right;
-            case TokenType.SLASH:
+            case SLASH:
                 checkNumberOperands(expr.operator, left, right);
                 return (double) left / (double)right;
-            case TokenType.PLUS:
+            case PLUS:
                 if(left instanceof Double && right instanceof Double) {
                     return (double)left + (double)right;
                 }
                 if(left instanceof String && right instanceof String) {
-                    return (String)left + (String)right
+                    return (String)left + (String)right;
+                }
+                if(left instanceof String && right instanceof Double) {
+                    Integer right_int = Integer.valueOf(right);
+                    return (String)left + right_int.toString();
+                }
+                if(left instanceof Double && right instanceof String) {
+                    Integer left_int = left;
+                    return left_int.toString() + (String)right;
                 }
                 
                 throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");
-            case TokenType.STAR:
+            case STAR:
                 checkNumberOperands(expr.operator, left, right);
-                return (double)left + (double)right;
-            case TokenType.GREATER:
+                return (double)left * (double)right;
+            case GREATER:
                 checkNumberOperands(expr.operator, left, right);
-                return double(left) > (double)right;
-            case TokenType.GREATER_EQUAL:
+                return (double)left > (double)right;
+            case GREATER_EQUAL:
                 checkNumberOperands(expr.operator, left, right);
-                return double(left) >= (double)right;
-            case TokenType.LESS:
+                return (double)left >= (double)right;
+            case LESS:
                 checkNumberOperands(expr.operator, left, right);
-                return double(left) < (double)right;
-            case TokenType.LESS_EQUAL:
+                return (double)left < (double)right;
+            case LESS_EQUAL:
                 checkNumberOperands(expr.operator, left, right);
-                return double(left) <= (double)right;
-            case TokenType.BANG_EQUAL: return !isEqual(left, right);
-            case TokenType.EQUAL_EQUAL: return isEqual(left, right);
-            
+                return (double)left <= (double)right;
+            case BANG_EQUAL: return !isEqual(left, right);
+            case EQUAL_EQUAL: return isEqual(left, right);
         }
+        return null;
     }
 
     private void checkNumberOperands(Token operator, Object left, Object right) {
@@ -105,7 +114,7 @@ class Interpreter implements Expr.Visitor<Object> {
         throw new RuntimeError(operator, "Operands must be numbers.");
     }
 
-    private Object isEqual(Object a, Object b) {
+    private Boolean isEqual(Object a, Object b) {
         if (a == null && b == null) return true;
         if (a == null) return false;
 
