@@ -79,11 +79,11 @@ class Interpreter implements Expr.Visitor<Object> {
                     return (String)left + (String)right;
                 }
                 if(left instanceof String && right instanceof Double) {
-                    Integer right_int = Integer.valueOf(right);
+                    Integer right_int = Integer.valueOf(((Double)right).intValue());
                     return (String)left + right_int.toString();
                 }
                 if(left instanceof Double && right instanceof String) {
-                    Integer left_int = left;
+                    Integer left_int = Integer.valueOf(((Double)left).intValue());
                     return left_int.toString() + (String)right;
                 }
                 
