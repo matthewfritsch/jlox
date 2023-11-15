@@ -1,5 +1,6 @@
 package com.matthewfritsch.lang;
 
+import java.util.ArrayList;
 import java.util.List;
 
 class Parser {
@@ -12,17 +13,35 @@ class Parser {
         this.tokens = tokens;
     }
 
-    Expr parse() {
-        try {
-            return expression();
+    List<Stmt> parse() {
+        List<Stmt> statements = new ArrayList<>();
+        while(!isAtEnd()) {
+            statements.add(statement());
         }
-        catch (ParseError error) {
-            return null;
-        }
+
+        return statements;
     }
 
     private Expr expression() {
         return equality();
+    }
+
+    private Stmt statement() {
+        if (match(PRINT)) return printStatement();
+
+        return expressionStatement();
+    }
+
+    private Stmt printStatement() {
+        Expr value = expression();
+        consume(TokenType.SEMICOLON, "Expect ';' after value.");
+        return new Stmt.Print(value);
+    }
+
+    private Stmt expressionStatement() {
+        Expr value = expression();
+        consume(TokenType.SEMICOLON, "Expect ';' after expression.");
+        return new Stmt.Expression(expr);
     }
 
     // equality -> comparison ( ( "!=" | "==" ) comparison )* ;
